@@ -100,15 +100,19 @@ class RPSGame
 
   def display_winner
     if human.move > computer.move
-      puts "#{human.name} won"
       human.score += 1
+      puts "#{human.name} won this round"
+      puts "#{human.name} score is #{human.score}"
     elsif human.move < computer.move
-      puts "#{computer.name} won"
       computer.score += 1
+      puts "#{computer.name} won"
+      puts "#{computer.name} score is #{computer.score}"
     else
-      puts "It's a tie!"
       human.score += 1
       computer.score += 1
+      puts "It's a tie!"
+      puts "#{computer.name} score is #{computer.score}"
+      puts "#{human.name} score is #{human.score}"
     end
   end
 
