@@ -103,17 +103,16 @@ class RPSGame
     if human.move > computer.move
       human.score += 1
       puts "#{human.name} won this round"
-      puts "#{human.name} score is #{human.score}"
+      puts "#{human.name} score is #{human.score}, #{computer.name} score is #{computer.score}"
     elsif human.move < computer.move
       computer.score += 1
       puts "#{computer.name} won"
-      puts "#{computer.name} score is #{computer.score}"
+      puts "#{human.name} score is #{human.score}, #{computer.name} score is #{computer.score}"
     else
       human.score += 1
       computer.score += 1
       puts "It's a tie!"
-      puts "#{computer.name} score is #{computer.score}"
-      puts "#{human.name} score is #{human.score}"
+      puts "#{human.name} score is #{human.score}, #{computer.name} score is #{computer.score}"
     end
   end
 
@@ -136,7 +135,11 @@ class RPSGame
       puts "Sorry, must be y or n"
     end
     return false if answer == 'n'
-    return true if answer == 'y'
+    if answer == 'y'
+      human.score = 0
+      computer.score = 0
+      return true 
+    end
   end
 
   def play
