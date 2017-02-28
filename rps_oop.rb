@@ -98,7 +98,7 @@ class RPSGame
     puts "#{computer.name} chose #{computer.move}"
   end
 
-  def display_winner
+  def display_round_winner
     if human.move > computer.move
       human.score += 1
       puts "#{human.name} won this round"
@@ -113,6 +113,16 @@ class RPSGame
       puts "It's a tie!"
       puts "#{computer.name} score is #{computer.score}"
       puts "#{human.name} score is #{human.score}"
+    end
+  end
+
+  def display_game_winner
+    if human.score == 10 && computer.score == 10
+      puts "It's a tie, both won the game"
+    elsif human.score == 10 
+      puts "#{human.name} won the game"
+    elsif computer.score == 10 
+      puts "#{computer.name} won the game"
     end
   end
 
@@ -134,8 +144,11 @@ class RPSGame
       human.choose
       computer.choose
       display_moves
-      display_winner
-      break unless play_again?
+      display_round_winner
+      if human.score == 10 || computer.score == 10
+        display_game_winner
+        break unless play_again?
+      end
     end
     display_goodbye_message
   end
