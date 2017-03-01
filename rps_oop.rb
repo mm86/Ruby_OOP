@@ -1,14 +1,32 @@
+class Spock
+  WINS_OVER = %w(rock scissors)
+end
 
+class Rock 
+  WINS_OVER = %w(scissors lizard)
+end
+
+class Lizard
+  WINS_OVER = %w(spock paper)
+end
+
+class Scissors
+  WINS_OVER = %w(paper lizard)
+end
+
+class Paper
+  WINS_OVER = %w(rock spock)
+end
 
 class Move
   attr_accessor :value 
   VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
   WINNING_COMBOS = {
-    'rock' => %w(scissors lizard),
-    'paper' => %w(rock spock),
-    'scissors' => %w(paper lizard),
-    'spock' => %w(rock scissors),
-    'lizard' => %w(spock paper)
+    'rock' => Rock::WINS_OVER,
+    'paper' => Paper::WINS_OVER,
+    'scissors' => Scissors::WINS_OVER,
+    'spock' => Spock::WINS_OVER,
+    'lizard' => Lizard::WINS_OVER
   }
   def initialize(value)
     @value = value
