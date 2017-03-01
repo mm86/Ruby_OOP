@@ -164,6 +164,15 @@ class RPSGame
     return true if answer == 'y'
   end
 
+  def check_winning_scores
+    result = false
+    if human.score == 10 || computer.score == 10
+      display_game_winner
+      result = true
+    end
+    result
+  end
+
   def play
     display_welcome_message
     loop do
@@ -172,8 +181,7 @@ class RPSGame
       display_moves
       display_round_winner
       display_scores
-      if human.score == 10 || computer.score == 10
-        display_game_winner
+      if check_winning_scores
         break unless play_again?
       end
     end
