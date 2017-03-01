@@ -42,10 +42,11 @@ class Move
 end
 
 class Player
-  attr_accessor :move, :name, :score
+  attr_accessor :move, :name, :score, :list_moves
 
   def initialize
     @score = 0
+    @list_moves = []
     set_name
   end
 end
@@ -71,7 +72,9 @@ class Human < Player
       puts "Sorry, invalid choice"
     end
     self.move = Move.new(choice)
+    self.list_moves << choice
   end
+
 end
 
 class Computer < Player
@@ -79,9 +82,13 @@ class Computer < Player
     self.name = ['tom', 'harry', 'charlie', 'Ra'].sample
   end
 
+  choice = nil
   def choose
-    self.move = Move.new(Move::VALUES.sample)
+    choice = Move::VALUES.sample
+    self.move = Move.new(choice)
+    self.list_moves << choice
   end
+
 end
 
 # Game Orchestration Engine
@@ -146,6 +153,14 @@ class RPSGame
     end
   end
 
+  def reset_scores
+    reset_scores
+    human.score = 0
+    computer.score = 0
+    human.list_moves = []
+    computer.list_moves = []
+  end
+
   def play_again?
     answer = nil
     loop do
@@ -155,8 +170,6 @@ class RPSGame
       puts "Sorry, must be y or n"
     end
     return false if answer == 'n'
-    human.score = 0
-    computer.score = 0
     return true if answer == 'y'
   end
 
@@ -169,6 +182,11 @@ class RPSGame
     result
   end
 
+  def display_history_moves 
+    puts "Human moves: #{human.list_moves}"
+    puts "Computer moves: #{computer.list_moves}"
+  end
+
   def play
     display_welcome_message
     loop do
@@ -178,6 +196,7 @@ class RPSGame
       increment_score(display_round_winner)
       display_scores
       if check_winning_scores
+        display_history_moves
         break unless play_again?
       end
     end
