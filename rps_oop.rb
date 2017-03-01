@@ -133,6 +133,9 @@ class RPSGame
       computer.score += 1
       puts "It's a tie!"
     end
+  end
+
+  def display_scores
     puts "#{human.name} score is #{human.score}"
     puts "#{computer.name} score is #{computer.score}"
   end
@@ -168,6 +171,7 @@ class RPSGame
       computer.choose
       display_moves
       display_round_winner
+      display_scores
       if human.score == 10 || computer.score == 10
         display_game_winner
         break unless play_again?
