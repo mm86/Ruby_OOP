@@ -1,58 +1,25 @@
-class Move
-  VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
 
+
+class Move
+  attr_accessor :value 
+  VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
+  WINNING_COMBOS = {
+    'rock' => %w(scissors lizard),
+    'paper' => %w(rock spock),
+    'scissors' => %w(paper lizard),
+    'spock' => %w(rock scissors),
+    'lizard' => %w(spock paper)
+  }
   def initialize(value)
     @value = value
   end
 
-  def scissors?
-    @value == 'scissors'
-  end
-
-  def rock?
-    @value == 'rock'
-  end
-
-  def paper?
-    @value == 'paper'
-  end
-
-  def lizard?
-    @value == 'lizard'
-  end
-
-  def spock?
-    @value == 'spock'
-  end
-
-  def >(other_move)
-    (rock? && other_move.scissors?) ||
-      (paper? && other_move.rock?) ||
-      (scissors? && other_move.paper?) ||
-      (rock? && other_move.lizard?) ||
-      (lizard? && other_move.spock?) ||
-      (spock? && other_move.scissors?) ||
-      (scissors? && other_move.lizard?) ||
-      (lizard? && other_move.paper?) ||
-      (paper? && other_move.spock?) ||
-      (spock? && other_move.rock?)
-  end
-
-  def <(other_move)
-    (rock? && other_move.paper?) ||
-      (paper? && other_move.scissors?) ||
-      (scissors? && other_move.rock?) ||
-      (rock? && other_move.lizard?) ||
-      (spock? && other_move.lizard?) ||
-      (scissors? && other_move.spock?) ||
-      (lizard? && other_move.scissors?) ||
-      (paper? && other_move.lizard?) ||
-      (spock? && other_move.paper?) ||
-      (rock? && other_move.spock?)
+  def win?(other_val)
+    WINNING_COMBOS[@value].include?(other_val.value)
   end
 
   def to_s
-    @value
+    self.value
   end
 end
 
@@ -134,12 +101,12 @@ class RPSGame
 
   def display_round_winner
     winner = nil
-    if human.move > computer.move
+    if human.move.win?(computer.move)
       winner = :human
       puts "#{human.name} won this round"
-    elsif human.move < computer.move
+    elsif computer.move.win?(human.move)
       winner = :computer
-      puts "#{computer.name} won"
+      puts "#{computer.name} won this round"
     else
       puts "It's a tie!"
     end
@@ -190,7 +157,6 @@ class RPSGame
       human.choose
       computer.choose
       display_moves
-      display_round_winner
       increment_score(display_round_winner)
       display_scores
       if check_winning_scores
