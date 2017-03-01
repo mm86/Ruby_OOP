@@ -1,5 +1,5 @@
 class Move
-  VALUES = ['rock', 'paper', 'scissors']
+  VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
 
   def initialize(value)
     @value = value
@@ -17,16 +17,38 @@ class Move
     @value == 'paper'
   end
 
+  def lizard?
+    @value == 'lizard'
+  end
+
+  def spock?
+    @value == 'spock'
+  end
+
   def >(other_move)
     (rock? && other_move.scissors?) ||
       (paper? && other_move.rock?) ||
-      (scissors? && other_move.paper?)
+      (scissors? && other_move.paper?) ||
+      (rock? && other_move.lizard?) ||
+      (lizard? && other_move.spock?) ||
+      (spock? && other_move.scissors?) ||
+      (scissors? && other_move.lizard?) ||
+      (lizard? && other_move.paper?) ||
+      (paper? && other_move.spock?) ||
+      (spock? && other_move.rock?)
   end
 
   def <(other_move)
     (rock? && other_move.paper?) ||
       (paper? && other_move.scissors?) ||
-      (scissors? && other_move.rock?)
+      (scissors? && other_move.rock?) ||
+      (rock? && other_move.lizard?) ||
+      (spock? && other_move.lizard?) ||
+      (scissors? && other_move.spock?) ||
+      (lizard? && other_move.scissors?) ||
+      (paper? && other_move.lizard?) ||
+      (spock? && other_move.paper?) ||
+      (rock? && other_move.spock?)
   end
 
   def to_s
@@ -58,7 +80,7 @@ class Human < Player
   def choose
     choice = nil
     loop do
-      puts "Please choose rock, paper or scissors"
+      puts "Please choose rock, paper, scissors, lizard or spock"
       choice = gets.chomp
       break if Move::VALUES.include?(choice)
       puts "Sorry, invalid choice"
@@ -87,7 +109,7 @@ class RPSGame
   end
 
   def display_welcome_message
-    puts "Welcome to Rock, Paper, Scissors"
+    puts "Welcome to Rock, Paper, Scissors, Lizard and Spock"
   end
 
   def display_goodbye_message
@@ -103,25 +125,24 @@ class RPSGame
     if human.move > computer.move
       human.score += 1
       puts "#{human.name} won this round"
-      puts "#{human.name} score is #{human.score}, #{computer.name} score is #{computer.score}"
     elsif human.move < computer.move
       computer.score += 1
       puts "#{computer.name} won"
-      puts "#{human.name} score is #{human.score}, #{computer.name} score is #{computer.score}"
     else
       human.score += 1
       computer.score += 1
       puts "It's a tie!"
-      puts "#{human.name} score is #{human.score}, #{computer.name} score is #{computer.score}"
     end
+    puts "#{human.name} score is #{human.score}"
+    puts "#{computer.name} score is #{computer.score}"
   end
 
   def display_game_winner
     if human.score == 10 && computer.score == 10
       puts "It's a tie, both won the game"
-    elsif human.score == 10 
+    elsif human.score == 10
       puts "#{human.name} won the game"
-    elsif computer.score == 10 
+    elsif computer.score == 10
       puts "#{computer.name} won the game"
     end
   end
@@ -138,7 +159,7 @@ class RPSGame
     if answer == 'y'
       human.score = 0
       computer.score = 0
-      return true 
+      return true
     end
   end
 
