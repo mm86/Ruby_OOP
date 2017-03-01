@@ -156,11 +156,9 @@ class RPSGame
       puts "Sorry, must be y or n"
     end
     return false if answer == 'n'
-    if answer == 'y'
-      human.score = 0
-      computer.score = 0
-      return true
-    end
+    human.score = 0
+    computer.score = 0
+    return true if answer == 'y'
   end
 
   def play
