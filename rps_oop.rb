@@ -121,18 +121,29 @@ class RPSGame
     puts "#{computer.name} chose #{computer.move}"
   end
 
-  def display_round_winner
-    if human.move > computer.move
+  def increment_score(winner)
+    if winner == :human
       human.score += 1
-      puts "#{human.name} won this round"
-    elsif human.move < computer.move
+    elsif winner == :computer
       computer.score += 1
-      puts "#{computer.name} won"
     else
       human.score += 1
       computer.score += 1
+    end
+  end
+
+  def display_round_winner
+    winner = nil
+    if human.move > computer.move
+      winner = :human
+      puts "#{human.name} won this round"
+    elsif human.move < computer.move
+      winner = :computer
+      puts "#{computer.name} won"
+    else
       puts "It's a tie!"
     end
+    winner
   end
 
   def display_scores
@@ -180,6 +191,7 @@ class RPSGame
       computer.choose
       display_moves
       display_round_winner
+      increment_score(display_round_winner)
       display_scores
       if check_winning_scores
         break unless play_again?
