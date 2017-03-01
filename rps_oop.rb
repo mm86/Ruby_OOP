@@ -145,7 +145,7 @@ class RPSGame
       puts "It's a tie, both won the game"
     elsif human.score == 10
       puts "#{human.name} won the game"
-    elsif computer.score == 10
+    else
       puts "#{computer.name} won the game"
     end
   end
