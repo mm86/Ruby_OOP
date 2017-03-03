@@ -1,3 +1,5 @@
+require 'pry'
+
 class Spock
   WINS_OVER = %w(rock scissors)
 end
@@ -42,11 +44,13 @@ class Move
 end
 
 class Player
-  attr_accessor :move, :name, :score, :list_moves
+  attr_accessor :move, :name, :score, :list_moves, :win_lose, :weights
 
   def initialize
     @score = 0
     @list_moves = []
+    @win_lose = []
+    @weights = {'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0, 'scissors' => 0.0, 'paper' => 0.0}
     set_name
   end
 end
@@ -82,9 +86,19 @@ class Computer < Player
     self.name = ['tom', 'harry', 'charlie', 'Ra'].sample
   end
 
-  choice = nil
+  
   def choose
-    choice = Move::VALUES.sample
+    choice = nil
+    loop do 
+      choice = Move::VALUES.sample
+      puts "computer chooses #{choice}"
+      if self.weights[choice] >= 50.0
+         puts "#{choice} weight is >= 50%"
+         choice = Move::VALUES.sample
+      end
+      break if self.weights[choice] < 50.0
+    end
+    puts "computer finally chooses #{choice}"
     self.move = Move.new(choice)
     self.list_moves << choice
   end
@@ -129,11 +143,14 @@ class RPSGame
     if human.move.win?(computer.move)
       winner = :human
       puts "#{human.name} won this round"
+      human.win_lose << 'win'
     elsif computer.move.win?(human.move)
       winner = :computer
       puts "#{computer.name} won this round"
+      human.win_lose << 'lose'
     else
       puts "It's a tie!"
+      human.win_lose << 'tie'
     end
     winner
   end
@@ -154,11 +171,11 @@ class RPSGame
   end
 
   def reset_scores
-    reset_scores
     human.score = 0
     computer.score = 0
     human.list_moves = []
     computer.list_moves = []
+    human.win_lose = []
   end
 
   def play_again?
@@ -170,6 +187,7 @@ class RPSGame
       puts "Sorry, must be y or n"
     end
     return false if answer == 'n'
+    reset_scores
     return true if answer == 'y'
   end
 
@@ -185,6 +203,28 @@ class RPSGame
   def display_history_moves 
     puts "Human moves: #{human.list_moves}"
     puts "Computer moves: #{computer.list_moves}"
+    puts "Human win&lose: #{human.win_lose}"
+  end
+
+  def calculate_moves 
+    hsh = Hash.new(0)
+    count = 0
+    new_hsh = Hash.new(0)
+    computer.list_moves.each_with_object(hsh) do |val, hsh|
+      hsh[val] += 1 
+      if human.win_lose[count] == 'win'
+        new_hsh[val] += 1
+      end
+      count += 1
+    end
+    hsh.each do |key, value|
+      if new_hsh[key] != nil
+        computer.weights[key] = ((new_hsh[key]/hsh[key].to_f)*100).round(2)
+      else
+        computer.weights[key] = 0 
+      end
+    end
+    p computer.weights
   end
 
   def play
@@ -195,6 +235,8 @@ class RPSGame
       display_moves
       increment_score(display_round_winner)
       display_scores
+      display_history_moves
+      calculate_moves
       if check_winning_scores
         display_history_moves
         break unless play_again?
