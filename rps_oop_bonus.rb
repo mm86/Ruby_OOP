@@ -104,6 +104,13 @@ class RPSGame
   def display_moves
     puts "#{human.name} chose #{human.move}"
     puts "#{computer.name} chose #{computer.move}"
+    puts "#{human.name}'s history: {human.history_of_moves}"
+    puts "#{computer.name}'s history: #{computer.history_of_moves}"
+  end
+
+  def update_history_of_moves
+    human.history_of_moves << human.move 
+    computer.history_of_moves << computer.move  
   end
 
   def increment_score
@@ -183,6 +190,7 @@ class RPSGame
     loop do
       human.choose
       computer.choose
+      update_history_of_moves
       display_moves
       compute_round_winner
       display_round_winner
