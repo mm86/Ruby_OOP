@@ -42,11 +42,12 @@ class Move
 end
 
 class Player
-  attr_accessor :move, :name, :score
+  attr_accessor :move, :name, :score, :history_of_moves
 
   def initialize
     set_name
     @score = 0
+    @history_of_moves = []
   end
 end
 
