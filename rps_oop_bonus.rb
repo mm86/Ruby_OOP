@@ -104,13 +104,13 @@ class RPSGame
   def display_moves
     puts "#{human.name} chose #{human.move}"
     puts "#{computer.name} chose #{computer.move}"
-    puts "#{human.name}'s history: {human.history_of_moves}"
+    puts "#{human.name}'s history: #{human.history_of_moves}"
     puts "#{computer.name}'s history: #{computer.history_of_moves}"
   end
 
   def update_history_of_moves
-    human.history_of_moves << human.move 
-    computer.history_of_moves << computer.move  
+    human.history_of_moves << human.move.value
+    computer.history_of_moves << computer.move.value  
   end
 
   def increment_score
