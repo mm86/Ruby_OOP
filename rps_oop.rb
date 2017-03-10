@@ -1,34 +1,12 @@
-require 'pry'
-
-class Spock
-  WINS_OVER = %w(rock scissors)
-end
-
-class Rock 
-  WINS_OVER = %w(scissors lizard)
-end
-
-class Lizard
-  WINS_OVER = %w(spock paper)
-end
-
-class Scissors
-  WINS_OVER = %w(paper lizard)
-end
-
-class Paper
-  WINS_OVER = %w(rock spock)
-end
-
 class Move
-  attr_accessor :value 
+  attr_accessor :value
   VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
   WINNING_COMBOS = {
-    'rock' => Rock::WINS_OVER,
-    'paper' => Paper::WINS_OVER,
-    'scissors' => Scissors::WINS_OVER,
-    'spock' => Spock::WINS_OVER,
-    'lizard' => Lizard::WINS_OVER
+    'rock' => %w(scissors lizard),
+    'paper' => %w(rock spock),
+    'scissors' => %w(paper lizard),
+    'spock' => %w(rock scissors),
+    'lizard' => %w(spock paper)
   }
   def initialize(value)
     @value = value
@@ -39,7 +17,7 @@ class Move
   end
 
   def to_s
-    self.value
+    @value
   end
 end
 
@@ -50,7 +28,8 @@ class Player
     @score = 0
     @list_moves = []
     @win_lose = []
-    @weights = {'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0, 'scissors' => 0.0, 'paper' => 0.0}
+    @weights = { 'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0, 
+                'scissors' => 0.0, 'paper' => 0.0 }
     set_name
   end
 end
@@ -76,33 +55,71 @@ class Human < Player
       puts "Sorry, invalid choice"
     end
     self.move = Move.new(choice)
-    self.list_moves << choice
+    @list_moves << choice
   end
-
 end
 
 class Computer < Player
   def set_name
-    self.name = ['tom', 'harry', 'charlie', 'Ra'].sample
+    self.name = ['Tom', 'Harry', 'Charlie', 'Ra', 'Sun'].sample
+  end
+  
+  case self.name 
+  when 'Tom'
+    choose_tom 
+  when 'Harry'
+    choose_harry
+  when 'Charlie'
+    choose_charlie
+  when 'Ra'
+    choose_ra
+  when 'Sun'
+    choose_sun
   end
 
-  
-  def choose
+  def choose_tom 
     choice = nil
-    loop do 
+    loop do
       choice = Move::VALUES.sample
       puts "computer chooses #{choice}"
-      if self.weights[choice] >= 50.0
-         puts "#{choice} weight is >= 50%"
-         choice = Move::VALUES.sample
+      if @weights[choice] >= 50.0
+        puts "#{choice} weight is >= 50%"
+        choice = Move::VALUES.sample
       end
-      break if self.weights[choice] < 50.0
+      break if @weights[choice] < 50.0
     end
     puts "computer finally chooses #{choice}"
     self.move = Move.new(choice)
-    self.list_moves << choice
+    @list_moves << choice
   end
 
+  def choose_ra 
+    choice = 'rock'
+    self.move = Move.new(choice)
+    @list_moves << choice
+  end
+
+  def choose_harry 
+    choice = ['spock', 'lizard'].sample
+    self.move = Move.new(choice)
+    @list_moves << choice
+  end
+
+  def choose_charlie
+    choice = ['rock', 'paper', 'scissors'].sample
+    self.move = Move.new(choice)
+    @list_moves << choice
+  end
+
+  def choose_sun
+    choice = if @list_moves.count('rock') > 1
+               ['paper', 'scissors', 'lizard', 'spock'].sample
+             else
+               Move::VALUES.sample
+             end
+    self.move = Move.new(choice)
+    @list_moves << choice
+  end
 end
 
 # Game Orchestration Engine
@@ -136,6 +153,17 @@ class RPSGame
       human.score += 1
       computer.score += 1
     end
+    update_human_win_lose(winner)
+  end
+
+  def update_human_win_lose(winner)
+    human.win_lose << if winner == :human
+                       'win'
+                     elsif winner == :computer
+                       'lose'
+                     else
+                       'tie'
+                     end
   end
 
   def display_round_winner
@@ -143,14 +171,11 @@ class RPSGame
     if human.move.win?(computer.move)
       winner = :human
       puts "#{human.name} won this round"
-      human.win_lose << 'win'
     elsif computer.move.win?(human.move)
       winner = :computer
       puts "#{computer.name} won this round"
-      human.win_lose << 'lose'
     else
       puts "It's a tie!"
-      human.win_lose << 'tie'
     end
     winner
   end
@@ -200,30 +225,42 @@ class RPSGame
     result
   end
 
-  def display_history_moves 
+  def display_history_moves
     puts "Human moves: #{human.list_moves}"
     puts "Computer moves: #{computer.list_moves}"
     puts "Human win&lose: #{human.win_lose}"
   end
 
-  def calculate_moves 
-    hsh = Hash.new(0)
+  def compute_player_win_results
     count = 0
-    new_hsh = Hash.new(0)
-    computer.list_moves.each_with_object(hsh) do |val, hsh|
-      hsh[val] += 1 
+    win_count_hsh = Hash.new(0)
+    hand_count_hsh = Hash.new(0)
+    computer.list_moves.each_with_object(hand_count_hsh) do |val, hand_count_hsh|
+      hand_count_hsh[val] += 1
       if human.win_lose[count] == 'win'
-        new_hsh[val] += 1
+        win_count_hsh[val] += 1
       end
       count += 1
     end
-    hsh.each do |key, value|
-      if new_hsh[key] != nil
-        computer.weights[key] = ((new_hsh[key]/hsh[key].to_f)*100).round(2)
+    [hand_count_hsh, win_count_hsh]
+  end
+
+  def compute_player_win_percentage(result)
+    hand_count_hsh = result[0]
+    win_count_hsh = result[1]
+    hand_count_hsh.each do |key, _|
+      if win_count_hsh[key] != nil
+        num = (win_count_hsh[key] / hand_count_hsh[key].to_f)
+        computer.weights[key] = (num * 100).round(2)
       else
-        computer.weights[key] = 0 
+        computer.weights[key] = 0
       end
     end
+  end
+
+  def calculate_moves
+    result = compute_player_win_results
+    compute_player_win_percentage(result)
     p computer.weights
   end
 
@@ -231,7 +268,7 @@ class RPSGame
     display_welcome_message
     loop do
       human.choose
-      computer.choose
+      computer.choose_personalities
       display_moves
       increment_score(display_round_winner)
       display_scores
