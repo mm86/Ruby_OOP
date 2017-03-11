@@ -120,13 +120,10 @@ class Sun < Player
   end
 
   def all_weights_greater_than_50?
-    result = true
     @weights.each do |_, val|
-      if val < 50.0
-        result = false
-      end
+      return false if val < 50.0
     end
-    result
+    true
   end
 
   def choose
