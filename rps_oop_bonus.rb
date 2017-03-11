@@ -151,19 +151,8 @@ class RPSGame
   end
 
   def computer_set_personalities
-    @computer_name = ['R2D2', 'Tom', 'Charlie', 'Sun', 'Hal'].sample
-    case @computer_name
-    when 'R2D2'
-      @computer = R2D2.new
-    when 'Tom'
-      @computer = Tom.new
-    when 'Charlie'
-      @computer = Charlie.new
-    when 'Sun'
-      @computer = Sun.new
-    when 'Hal'
-      @computer = Hal.new
-    end
+    computer_type = [R2D2, Tom, Charlie, Sun, Hal].sample
+    @computer = computer_type.new
   end
 
   def display_welcome_message
