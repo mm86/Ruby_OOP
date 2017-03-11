@@ -51,6 +51,13 @@ class Player
 end
 
 class Human < Player
+  attr_accessor :win_counts
+
+  def initialize
+    @win_counts = { 'spock' => 0, 'lizard' => 0, 'rock' => 0,
+                    'scissors' => 0, 'paper' => 0 }
+  end
+
   def set_name
     n = ""
     loop do
@@ -72,6 +79,13 @@ class Human < Player
     end
     self.move = Move.new(choice)
   end
+
+  def reset_game 
+    self.score = 0
+    self.history_of_moves = []
+    self.win_counts = { 'spock' => 0, 'lizard' => 0, 'rock' => 0,
+                        'scissors' => 0, 'paper' => 0 }
+  end
 end
 
 class R2D2 < Player
@@ -81,6 +95,13 @@ class R2D2 < Player
 
   def choose
     self.move = Move.new(['rock', 'paper', 'scissors'].sample)
+  end
+
+  def reset_game 
+    self.score = 0
+    self.history_of_moves = []
+    self.weights = { 'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0,
+                         'scissors' => 0.0, 'paper' => 0.0 } 
   end
 end
 
@@ -92,6 +113,13 @@ class Hal < Player
   def choose
     self.move = Move.new(['spock', 'lizard'].sample)
   end
+
+  def reset_game 
+    self.score = 0
+    self.history_of_moves = []
+    self.weights = { 'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0,
+                         'scissors' => 0.0, 'paper' => 0.0 } 
+  end
 end
 
 class Charlie < Player
@@ -102,6 +130,13 @@ class Charlie < Player
   def choose
     self.move = Move.new('rock')
   end
+  
+  def reset_game 
+    self.score = 0
+    self.history_of_moves = []
+    self.weights = { 'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0,
+                         'scissors' => 0.0, 'paper' => 0.0 } 
+  end
 end
 
 class Tom < Player
@@ -111,6 +146,13 @@ class Tom < Player
 
   def choose
     self.move = Move.new('paper')
+  end
+  
+  def reset_game 
+    self.score = 0
+    self.history_of_moves = []
+    self.weights = { 'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0,
+                         'scissors' => 0.0, 'paper' => 0.0 } 
   end
 end
 
@@ -139,6 +181,13 @@ class Sun < Player
     end
     puts "computer finally chooses #{choice}"
     self.move = Move.new(choice)
+  end
+
+  def reset_game 
+    self.score = 0
+    self.history_of_moves = []
+    self.weights = { 'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0,
+                         'scissors' => 0.0, 'paper' => 0.0 } 
   end
 end
 
@@ -273,7 +322,13 @@ class RPSGame
     display_score
   end
 
-  def check_score_ten?
+  def update_human_win_count
+    if @winner.person == :human
+      #update the win_count hash, but how to find which hand human won 
+    end
+  end
+
+  def player_won?
     human.score == 10 || computer.score == 10
   end
 
@@ -288,13 +343,9 @@ class RPSGame
     end
   end
 
-  def reset_scores
-    human.score = 0
-    computer.score = 0
-    human.history_of_moves = []
-    computer.history_of_moves = []
-    computer.weights = { 'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0,
-                         'scissors' => 0.0, 'paper' => 0.0 }
+  def reset_game
+    human.reset_game
+    computer.reset_game
   end
 
   def play_again?
@@ -307,7 +358,7 @@ class RPSGame
     end
 
     return false if answer == 'n'
-    reset_scores
+    reset_game
     return true if answer == 'y'
   end
 
@@ -324,8 +375,9 @@ class RPSGame
       display_and_update_history_of_moves
       compute_and_display_round_winner
       increment_and_display_score
+      update_human_win_count
       compute_weights_percentage
-      if check_score_ten?
+      if player_won?
         display_game_winner
         break unless play_again?
       end
