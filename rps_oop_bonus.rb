@@ -38,7 +38,8 @@ class Move
 end
 
 class Player
-  attr_accessor :move, :name, :score, :history_of_moves, :weights, :results
+  attr_accessor :move, :name, :score, :history_of_moves,
+                :weights, :results, :opponent, :win_counts
 
   def initialize
     set_name
@@ -51,13 +52,6 @@ class Player
 end
 
 class Human < Player
-  attr_accessor :win_counts
-
-  def initialize
-    @win_counts = { 'spock' => 0, 'lizard' => 0, 'rock' => 0,
-                    'scissors' => 0, 'paper' => 0 }
-  end
-
   def set_name
     n = ""
     loop do
@@ -80,15 +74,22 @@ class Human < Player
     self.move = Move.new(choice)
   end
 
-  def reset_game 
+  def reset_game
     self.score = 0
     self.history_of_moves = []
-    self.win_counts = { 'spock' => 0, 'lizard' => 0, 'rock' => 0,
-                        'scissors' => 0, 'paper' => 0 }
   end
 end
 
-class R2D2 < Player
+class Computer < Player
+  def reset_game
+    self.score = 0
+    self.history_of_moves = []
+    self.weights = { 'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0,
+                     'scissors' => 0.0, 'paper' => 0.0 }
+  end
+end
+
+class R2D2 < Computer
   def set_name
     self.name = 'R2D2'
   end
@@ -96,16 +97,9 @@ class R2D2 < Player
   def choose
     self.move = Move.new(['rock', 'paper', 'scissors'].sample)
   end
-
-  def reset_game 
-    self.score = 0
-    self.history_of_moves = []
-    self.weights = { 'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0,
-                         'scissors' => 0.0, 'paper' => 0.0 } 
-  end
 end
 
-class Hal < Player
+class Hal < Computer
   def set_name
     self.name = 'Hal'
   end
@@ -113,16 +107,9 @@ class Hal < Player
   def choose
     self.move = Move.new(['spock', 'lizard'].sample)
   end
-
-  def reset_game 
-    self.score = 0
-    self.history_of_moves = []
-    self.weights = { 'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0,
-                         'scissors' => 0.0, 'paper' => 0.0 } 
-  end
 end
 
-class Charlie < Player
+class Charlie < Computer
   def set_name
     self.name = 'Charlie'
   end
@@ -130,16 +117,9 @@ class Charlie < Player
   def choose
     self.move = Move.new('rock')
   end
-  
-  def reset_game 
-    self.score = 0
-    self.history_of_moves = []
-    self.weights = { 'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0,
-                         'scissors' => 0.0, 'paper' => 0.0 } 
-  end
 end
 
-class Tom < Player
+class Tom < Computer
   def set_name
     self.name = 'Tom'
   end
@@ -147,16 +127,9 @@ class Tom < Player
   def choose
     self.move = Move.new('paper')
   end
-  
-  def reset_game 
-    self.score = 0
-    self.history_of_moves = []
-    self.weights = { 'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0,
-                         'scissors' => 0.0, 'paper' => 0.0 } 
-  end
 end
 
-class Sun < Player
+class Sun < Computer
   def set_name
     self.name = 'Sun'
   end
@@ -168,40 +141,72 @@ class Sun < Player
     true
   end
 
+  def human_win_percent(win_counts, key)
+    computer_hand_count = @history_of_moves.count(key).to_f
+    win_counts / computer_hand_count
+  end
+
+  def human_win_count
+    @opponent.win_counts = { 'spock' => 0, 'lizard' => 0, 'rock' => 0,
+                             'scissors' => 0, 'paper' => 0 }
+    count = 0
+    # for each move of the computer, calculate the number of times human has won
+    @history_of_moves.each_with_object(@opponent.win_counts) do |val, hsh|
+      if @opponent.results[count] == 'win'
+        hsh[val] += 1
+      end
+      count += 1
+    end
+    @opponent.win_counts
+  end
+
+  def compute_weights_percentage
+    # computes the human win percentage for each hand chosen by the computer
+    human_win = human_win_count
+    human_win.each do |key, win_counts|
+      if win_counts == 0.0
+        @weights[key] = 0.0
+      else
+        human_win_val = human_win_percent(win_counts, key)
+        @weights[key] = (human_win_val * 100).round(2)
+      end
+    end
+    puts "Computer Weights:"
+    p @weights
+  end
+
   def choose
     choice = nil
     loop do
       choice = Move::VALUES.sample
-      puts "computer chooses #{choice}"
+      compute_weights_percentage
       if @weights[choice] >= 50.0
         puts "#{choice} weight is >= 50%"
         choice = Move::VALUES.sample
       end
       break if @weights[choice] < 50.0 || all_weights_greater_than_50?
     end
-    puts "computer finally chooses #{choice}"
     self.move = Move.new(choice)
-  end
-
-  def reset_game 
-    self.score = 0
-    self.history_of_moves = []
-    self.weights = { 'spock' => 0.0, 'lizard' => 0.0, 'rock' => 0.0,
-                         'scissors' => 0.0, 'paper' => 0.0 } 
   end
 end
 
 class RPSGame
   attr_accessor :human, :computer, :winner
-
+  WINNING_SCORE = 10
   def initialize
     @human = Human.new
     computer_set_personalities
+    computer_set_opponent
   end
 
   def computer_set_personalities
-    computer_type = [R2D2, Tom, Charlie, Sun, Hal].sample
+    # computer_type = [R2D2, Charlie, Tom, Sun, Hal].sample
+    computer_type = Sun
     @computer = computer_type.new
+  end
+
+  def computer_set_opponent
+    @computer.opponent = @human
   end
 
   def display_welcome_message
@@ -235,20 +240,25 @@ class RPSGame
     display_moves
   end
 
+  def update_human_results
+    human.results << if @winner.person == :human
+                       'win'
+                     elsif @winner.person == :computer
+                       'lose'
+                     else
+                       'tie'
+                     end
+  end
+
   def display_round_winner
     puts "-------WINNER IS --------"
-    result = nil
     if @winner.person == :human
       puts "The winner for this round is #{human.name}"
-      result = 'win'
     elsif @winner.person == :computer
       puts "The winner for this round is #{computer.name}"
-      result = 'lose'
     else
       puts "It's a tie this round"
-      result = 'tie'
     end
-    human.results << result
   end
 
   def compute_round_winner
@@ -283,60 +293,20 @@ class RPSGame
     display_round_winner
   end
 
-  def human_win_percent(human_hand_key, key)
-    computer_hand_count = computer.history_of_moves.count(key).to_f
-    human_hand_key / computer_hand_count
-  end
-
-  def human_win_count
-    human_hands_win = { 'spock' => 0, 'lizard' => 0, 'rock' => 0,
-                        'scissors' => 0, 'paper' => 0 }
-    count = 0
-    # for each move of the computer, calculate the number of times human has won
-    computer.history_of_moves.each_with_object(human_hands_win) do |val, hsh|
-      if human.results[count] == 'win'
-        hsh[val] += 1
-      end
-      count += 1
-    end
-    human_hands_win
-  end
-
-  def compute_weights_percentage
-    # computes the human win percentage for each hand chosen by the computer
-    human_win = human_win_count
-    human_win.each do |key, _|
-      if human_win[key] == 0.0
-        computer.weights[key] = 0.0
-      else
-        human_win_val = human_win_percent(human_win[key], key)
-        computer.weights[key] = (human_win_val * 100).round(2)
-      end
-    end
-    puts "Computer Weights:"
-    p computer.weights
-  end
-
   def increment_and_display_score
     increment_score
     display_score
   end
 
-  def update_human_win_count
-    if @winner.person == :human
-      #update the win_count hash, but how to find which hand human won 
-    end
-  end
-
   def player_won?
-    human.score == 10 || computer.score == 10
+    human.score == WINNING_SCORE || computer.score == WINNING_SCORE
   end
 
   def display_game_winner
     puts "----------GAME WINNER IS -------------"
-    if human.score == 10 && computer.score == 10
+    if human.score == WINNING_SCORE && computer.score == WINNING_SCORE
       puts "It's a tie. Both won the game"
-    elsif human.score == 10
+    elsif human.score == WINNING_SCORE
       puts "#{human.name} won the game"
     else
       puts "#{computer.name} won the game"
@@ -357,9 +327,7 @@ class RPSGame
       puts "Sorry, must be y or n."
     end
 
-    return false if answer == 'n'
-    reset_game
-    return true if answer == 'y'
+    answer == 'y'
   end
 
   def display_goodbye_message
@@ -368,18 +336,17 @@ class RPSGame
 
   def play
     display_welcome_message
-
     loop do
       human.choose
       computer.choose
       display_and_update_history_of_moves
       compute_and_display_round_winner
+      update_human_results
       increment_and_display_score
-      update_human_win_count
-      compute_weights_percentage
       if player_won?
         display_game_winner
         break unless play_again?
+        reset_game
       end
     end
     display_goodbye_message
