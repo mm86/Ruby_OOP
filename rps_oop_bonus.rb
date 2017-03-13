@@ -200,8 +200,7 @@ class RPSGame
   end
 
   def computer_set_personalities
-    # computer_type = [R2D2, Charlie, Tom, Sun, Hal].sample
-    computer_type = Sun
+    computer_type = [R2D2, Charlie, Tom, Sun, Hal].sample
     @computer = computer_type.new
   end
 
