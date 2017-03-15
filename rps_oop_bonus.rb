@@ -89,6 +89,10 @@ class Human < Player
                         'scissors' => 0, 'paper' => 0 }
     self.results = []
   end
+
+  def add_win_to_counts(computer_move)
+    @win_counts[computer_move.to_s] += 1
+  end
 end
 
 class Computer < Player
@@ -198,8 +202,8 @@ class RPSGame
   end
 
   def computer_set_personalities
-    computer_type = [R2D2, Charlie, Tom, Sun, Hal].sample
-    @computer = computer_type.new
+    # computer_type = [R2D2, Charlie, Tom, Sun, Hal].sample
+    @computer = Sun.new
   end
 
   def computer_set_opponent
@@ -248,16 +252,7 @@ class RPSGame
   end
 
   def update_human_win_counts
-    human.win_counts = { 'spock' => 0, 'lizard' => 0, 'rock' => 0,
-                         'scissors' => 0, 'paper' => 0 }
-    count = 0
-    # for each move of the computer, calculate the number of times human has won
-    @computer.history_of_moves.each_with_object(@human.win_counts) do |val, hsh|
-      if @human.results[count] == 'win'
-        hsh[val] += 1
-      end
-      count += 1
-    end
+    human.add_win_to_counts(computer.move) if @winner.person == :human
   end
 
   def update_human_results_and_win_counts
