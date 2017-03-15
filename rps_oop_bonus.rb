@@ -39,7 +39,7 @@ end
 
 class Player
   attr_accessor :move, :name, :score, :history_of_moves,
-                :weights, :results, :opponent, :win_counts
+                :weights, :results, :opponent
 
   def initialize
     set_name
@@ -52,6 +52,14 @@ class Player
 end
 
 class Human < Player
+  attr_accessor :win_counts
+
+  def initialize
+    super
+    @win_counts = { 'spock' => 0, 'lizard' => 0, 'rock' => 0,
+                    'scissors' => 0, 'paper' => 0 }
+  end
+
   def set_name
     n = ""
     loop do
@@ -77,6 +85,9 @@ class Human < Player
   def reset_game
     self.score = 0
     self.history_of_moves = []
+    self.win_counts = { 'spock' => 0, 'lizard' => 0, 'rock' => 0,
+                        'scissors' => 0, 'paper' => 0 }
+    self.results = []
   end
 end
 
@@ -146,25 +157,12 @@ class Sun < Computer
     win_counts / computer_hand_count
   end
 
-  def human_win_count
-    @opponent.win_counts = { 'spock' => 0, 'lizard' => 0, 'rock' => 0,
-                             'scissors' => 0, 'paper' => 0 }
-    count = 0
-    # for each move of the computer, calculate the number of times human has won
-    @history_of_moves.each_with_object(@opponent.win_counts) do |val, hsh|
-      if @opponent.results[count] == 'win'
-        hsh[val] += 1
-      end
-      count += 1
-    end
-    @opponent.win_counts
-  end
-
   def compute_weights_percentage
     # computes the human win percentage for each hand chosen by the computer
-    human_win = human_win_count
+    human_win = @opponent.win_counts
+    p human_win
     human_win.each do |key, win_counts|
-      if win_counts == 0.0
+      if win_counts == 0
         @weights[key] = 0.0
       else
         human_win_val = human_win_percent(win_counts, key)
@@ -247,6 +245,24 @@ class RPSGame
                      else
                        'tie'
                      end
+  end
+
+  def update_human_win_counts
+    human.win_counts = { 'spock' => 0, 'lizard' => 0, 'rock' => 0,
+                         'scissors' => 0, 'paper' => 0 }
+    count = 0
+    # for each move of the computer, calculate the number of times human has won
+    @computer.history_of_moves.each_with_object(@human.win_counts) do |val, hsh|
+      if @human.results[count] == 'win'
+        hsh[val] += 1
+      end
+      count += 1
+    end
+  end
+
+  def update_human_results_and_win_counts
+    update_human_results
+    update_human_win_counts
   end
 
   def display_round_winner
@@ -340,7 +356,7 @@ class RPSGame
       computer.choose
       display_and_update_history_of_moves
       compute_and_display_round_winner
-      update_human_results
+      update_human_results_and_win_counts
       increment_and_display_score
       if player_won?
         display_game_winner
