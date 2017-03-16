@@ -32,3 +32,5 @@ class TTTGame
   end
 end
 
+game = TTTGame.new
+game.play
