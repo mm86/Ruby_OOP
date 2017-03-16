@@ -1,11 +1,10 @@
 require("pry")
 
 class Board
-  INITIAL_MARKER = " "
 
   def initialize
     @squares = {}
-    (1..9).each { |key| @squares[key] = Square.new(INITIAL_MARKER) }
+    (1..9).each { |key| @squares[key] = Square.new }
   end
 
   def get_square_at(key)
@@ -15,17 +14,30 @@ class Board
   def set_square_at(square, marker)
     @squares[square].marker = marker
   end
+
+  def unmarked_keys
+    @squares.keys.select { |key| @squares[key].unmarked? }
+  end
+
+  def full?
+    unmarked_keys.empty?
+  end
 end
 
 class Square
+  INITIAL_MARKER = " "
   attr_accessor :marker
 
-  def initialize(marker)
+  def initialize(marker = INITIAL_MARKER)
     @marker = marker
   end
 
   def to_s
     @marker
+  end
+
+  def unmarked?
+    marker == INITIAL_MARKER
   end
 end
 
@@ -54,7 +66,9 @@ class TTTGame
     puts ""
   end
 
-  def display_board(board)
+  def display_board
+    system 'clear'
+    puts "You are a #{human.marker}, Computer is a #{computer.marker}"
     puts ""
     puts "     |     |"
     puts "  #{board.get_square_at(1)}  |  #{board.get_square_at(2)}  |  #{board.get_square_at(3)}  "
@@ -71,11 +85,11 @@ class TTTGame
   end
 
   def human_moves
-    puts "Choose a square from 1-9"
+    puts "Choose a square from #{board.unmarked_keys.join(', ')}"
     square = nil
     loop do 
       square = gets.chomp.to_i
-      break if (1..9).include?(square)
+      break if board.unmarked_keys.include?(square)
       puts "Please choose a valid number from 1 to 9"
     end
 
@@ -83,7 +97,12 @@ class TTTGame
   end
 
   def computer_moves 
-    board.set_square_at((1..9).to_a.sample,computer.marker)
+    board.set_square_at(board.unmarked_keys.sample, computer.marker)
+  end
+
+  def display_result
+    display_board 
+    puts "Board is full"
   end
 
   def display_goodbye_message
@@ -92,19 +111,17 @@ class TTTGame
 
   def play
     display_welcome_message
+    display_board
     loop do
-      display_board(board)
       human_moves
-      display_board(board)
-
-      #break if someone_won? || board_full?
+      break if board.full?
 
       computer_moves
-      display_board(board)
-      #break if someone_won? || board_full?
-      break
+      break if board.full?
+      display_board
     end
-    #display_result
+
+    display_result
     display_goodbye_message
   end
 end
