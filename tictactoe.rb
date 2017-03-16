@@ -24,6 +24,22 @@ class TTTGame
     puts ""
   end
 
+  def display_board 
+    puts ""
+    puts "     |     |"
+    puts "     |     |"
+    puts "     |     |"
+    puts "-----+-----+-----"
+    puts "     |     |"
+    puts "     |     |"
+    puts "     |     |"
+    puts "-----+-----+-----"
+    puts "     |     |"
+    puts "     |     |"
+    puts "     |     |"
+    puts ""
+  end
+
   def display_goodbye_message
     puts "Thanks for playing Tic Tac Toe. Goodbye"
   end
