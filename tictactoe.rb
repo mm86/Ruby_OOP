@@ -1,19 +1,27 @@
+require("pry")
+
 class Board
-  INITIAL_MARKER = "X"
+  INITIAL_MARKER = " "
 
   def initialize
     @squares = {}
-    (1..9).each { |key| @squares[key] = INITIAL_MARKER }
+    (1..9).each { |key| @squares[key] = Square.new(INITIAL_MARKER) }
   end
 
   def get_square_at(key)
     @squares[key]
   end
+
+  def set_square_at(square, marker)
+    @squares[square].marker = marker
+  end
 end
 
 class Square
+  attr_accessor :marker
+
   def initialize(marker)
-    @marker
+    @marker = marker
   end
 
   def to_s
@@ -22,19 +30,20 @@ class Square
 end
 
 class Player
-  def initialize
-  end
+  attr_reader :marker
 
-  def mark
+  def initialize(marker)
+    @marker = marker
   end
-
 end
 
 class TTTGame
-  attr_reader :board
+  attr_reader :board, :human, :computer
 
   def initialize
     @board = Board.new
+    @human = Player.new("X")
+    @computer = Player.new("X")
   end
 
   def display_welcome_message
@@ -58,6 +67,18 @@ class TTTGame
     puts ""
   end
 
+  def human_moves
+    puts "Choose a square from 1-9"
+    square = nil
+    loop do 
+      square = gets.chomp.to_i
+      break if (1..9).include?(square)
+      puts "Please choose a valid number from 1 to 9"
+    end
+
+    board.set_square_at(square, human.marker)
+  end
+
   def display_goodbye_message
     puts "Thanks for playing Tic Tac Toe. Goodbye"
   end
@@ -66,13 +87,15 @@ class TTTGame
     display_welcome_message
     loop do
       display_board(board)
-      first_player_moves
+      human_moves
+      display_board(board)
+      break
       break if someone_won? || board_full?
 
-      second_player_moves
+      computer_moves
       break if someone_won? || board_full?
     end
-    display_result
+    #display_result
     display_goodbye_message
   end
 end
