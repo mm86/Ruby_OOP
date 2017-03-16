@@ -21,7 +21,7 @@ class TTTGame
 
   def display_welcome_message
     puts "Welcome to Tic Tac Toe Game!"
-    puts "" 
+    puts ""
   end
 
   def display_goodbye_message
@@ -34,7 +34,7 @@ class TTTGame
       display_board
       first_player_moves
       break if someone_won? || board_full?
-      
+
       second_player_moves
       break if someone_won? || board_full?
     end
