@@ -24,6 +24,7 @@ class TTTGame
       display_board
       first_player_moves
       break if someone_won? || board_full?
+      
       second_player_moves
       break if someone_won? || board_full?
     end
