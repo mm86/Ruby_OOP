@@ -18,6 +18,9 @@ class Player
 end
 
 class TTTGame
+  def initialize
+    @board = Board.new
+  end
 
   def display_welcome_message
     puts "Welcome to Tic Tac Toe Game!"
@@ -47,7 +50,7 @@ class TTTGame
   def play
     display_welcome_message
     loop do
-      display_board
+      display_board(board)
       first_player_moves
       break if someone_won? || board_full?
 
