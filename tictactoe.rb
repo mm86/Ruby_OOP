@@ -38,12 +38,15 @@ class Player
 end
 
 class TTTGame
+  HUMAN_MARKER = "X"
+  COMPUTER_MARKER = "O"
+
   attr_reader :board, :human, :computer
 
   def initialize
     @board = Board.new
-    @human = Player.new("X")
-    @computer = Player.new("X")
+    @human = Player.new(HUMAN_MARKER)
+    @computer = Player.new(COMPUTER_MARKER)
   end
 
   def display_welcome_message
@@ -79,6 +82,10 @@ class TTTGame
     board.set_square_at(square, human.marker)
   end
 
+  def computer_moves 
+    board.set_square_at((1..9).to_a.sample,computer.marker)
+  end
+
   def display_goodbye_message
     puts "Thanks for playing Tic Tac Toe. Goodbye"
   end
@@ -89,11 +96,13 @@ class TTTGame
       display_board(board)
       human_moves
       display_board(board)
-      break
-      break if someone_won? || board_full?
+
+      #break if someone_won? || board_full?
 
       computer_moves
-      break if someone_won? || board_full?
+      display_board(board)
+      #break if someone_won? || board_full?
+      break
     end
     #display_result
     display_goodbye_message
