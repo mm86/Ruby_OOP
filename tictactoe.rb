@@ -268,8 +268,8 @@ class TTTGame
     puts "Hi #{human.name}, Please choose a marker: (X/O)"
     choice = nil
     loop do
-      choice = gets.chomp
-      break if %(X O).include? choice
+      choice = gets.chomp.downcase
+      break if !choice.empty? && %(X O x o).include?(choice) && choice !~ /^\s*$/
       puts "Please choose a valid marker."
     end
     choice == 'X' ? @computer.marker = 'O' : @computer.marker = 'X'
