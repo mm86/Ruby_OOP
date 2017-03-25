@@ -124,7 +124,7 @@ class Human < Player
     loop do
       puts "What is your name?"
       answer = gets.chomp
-      break unless answer.empty?
+      break unless answer.empty? || answer.match(/^\s*$/)
       puts "Please enter a name"
     end
     @name = answer
