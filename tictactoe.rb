@@ -379,9 +379,6 @@ class TTTGame
       human.score += 1
     when computer.marker
       computer.score += 1
-    else
-      human.score += 1
-      computer.score += 1
     end
   end
 
