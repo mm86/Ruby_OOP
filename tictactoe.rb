@@ -89,7 +89,7 @@ class Square
   end
 
   def to_s
-    @marker
+    marker
   end
 
   def unmarked?
@@ -106,7 +106,7 @@ class Player
   attr_accessor :marker, :name, :score
 
   def reset_scores
-    @score = 0
+    self.score = 0
   end
 end
 
@@ -162,36 +162,40 @@ class Computer < Player
     @marker == 'O' ? 'X' : 'O'
   end
 
+  def square_contains_initial_marker?(element)
+    board.squares[element].marker == Square::INITIAL_MARKER
+  end
+
   def find_at_risk_squares(marker, line)
     count = 0
     empty_index = nil
     line.each do |element|
       count += 1 if board.squares[element].marker == marker
-      empty_index = element if board.squares[element].marker == ' '
+      empty_index = element if square_contains_initial_marker?(element)
       return empty_index if count == 2 && line.last == element
     end
     nil
   end
 
-  def set_empty_square
-    result = false
-    if @empty_square
-      board[@empty_square] = @marker
-      result = true
+  def set_empty_square?
+    empty_square_filled = false
+    if empty_square
+      board[empty_square] = @marker
+      empty_square_filled = true
     end
-    result
+    empty_square_filled
   end
 
   def detect_risk_squares(marker)
     Board::WINNING_LINES.each do |line|
-      @empty_square = find_at_risk_squares(marker, line)
-      break if set_empty_square
+      self.empty_square = find_at_risk_squares(marker, line)
+      break if set_empty_square?
     end
   end
 
   def pick_empty_square_5
     if board.unmarked_keys.include?(SQUARE_NO_5)
-      @empty_square = SQUARE_NO_5
+      self.empty_square = SQUARE_NO_5
       board[SQUARE_NO_5] = @marker
     end
   end
@@ -202,9 +206,9 @@ class Computer < Player
 
   def move
     detect_risk_squares(marker)
-    detect_risk_squares(opponent_marker) if @empty_square.nil?
-    pick_empty_square_5 if @empty_square.nil?
-    pick_random_square if @empty_square.nil?
+    detect_risk_squares(opponent_marker) if empty_square.nil?
+    pick_empty_square_5 if empty_square.nil?
+    pick_random_square if empty_square.nil?
   end
 end
 
@@ -226,28 +230,33 @@ class TTTGame
     display_welcome_message
     loop do
       display_board
-
-      loop do
-        current_player_moves
-        break if board.someone_won? || board.full?
-        clear_screen_and_display_board
-      end
-
+      play_round
       display_result
       update_player_scores
-      someone_won_game? ? (break unless !play_new_game) : move_to_next_round
+      if someone_won_game?
+        break if play_new_game?
+      end
+      move_to_next_round
     end
     display_goodbye_message
   end
 
   private
 
+  def play_round
+    loop do
+      current_player_moves
+      break if board.someone_won? || board.full?
+      clear_screen_and_display_board
+    end
+  end
+
   def ask_human_to_choose
     puts "Please choose who goes first - human/computer"
     answer = nil
     loop do
       answer = gets.chomp
-      break if %w(human computer).include? answer
+      break if %w[human computer Human Computer].include? answer
       puts "Invalid choice."
     end
     assign_current_marker(answer)
@@ -257,23 +266,27 @@ class TTTGame
     if FIRST_TO_MOVE == 'choose'
       ask_human_to_choose
     elsif FIRST_TO_MOVE == 'human'
-      @current_marker = @human.marker
+      self.current_marker = @human.marker
     else
-      @current_marker = @computer.marker
+      self.current_marker = @computer.marker
     end
-    @first_player_to_move = @current_marker
+    self.first_player_to_move = current_marker
+  end
+
+  def valid_choice?(choice)
+    !choice.empty? && %(X O x o).include?(choice) && choice !~ /^\s*$/
   end
 
   def ask_human_to_choose_marker
     puts "Hi #{human.name}, Please choose a marker: (X/O)"
     choice = nil
     loop do
-      choice = gets.chomp.downcase
-      break if !choice.empty? && %(X O x o).include?(choice) && choice !~ /^\s*$/
+      choice = gets.chomp
+      break if valid_choice?(choice)
       puts "Please choose a valid marker."
     end
-    choice == 'X' ? @computer.marker = 'O' : @computer.marker = 'X'
-    @human.marker = choice
+    %w[X x].include?(choice) ? @computer.marker = 'O' : @computer.marker = 'X'
+    @human.marker = choice.upcase
   end
 
   def set_game_options
@@ -301,7 +314,7 @@ class TTTGame
     puts ""
   end
 
-  def play_new_game
+  def play_new_game?
     display_game_winner
     return true unless play_again?
     reset(:new)
@@ -311,7 +324,7 @@ class TTTGame
 
   def move_to_next_round
     start_next_round
-    @current_marker = @first_player_to_move
+    self.current_marker = first_player_to_move
     reset(:old)
   end
 
@@ -320,11 +333,11 @@ class TTTGame
   end
 
   def assign_current_marker(answer)
-    @current_marker = if answer == 'human'
-                        @human.marker
-                      else
-                        @computer.marker
-                      end
+    self.current_marker = if answer == 'human'
+                            @human.marker
+                          else
+                            @computer.marker
+                          end
   end
 
   def clear_screen_and_display_board
@@ -333,7 +346,7 @@ class TTTGame
   end
 
   def human_turn?
-    @current_marker == human.marker
+    current_marker == human.marker
   end
 
   def computer_moves
@@ -343,10 +356,10 @@ class TTTGame
   def current_player_moves
     if human_turn?
       human.move
-      @current_marker = computer.marker
+      self.current_marker = computer.marker
     else
       computer.move
-      @current_marker = human.marker
+      self.current_marker = human.marker
     end
   end
 
@@ -368,7 +381,7 @@ class TTTGame
 
     loop do
       answer = gets.chomp
-      break unless !answer.empty?
+      break if answer.empty?
       puts "Invalid entry. Press enter"
     end
   end
@@ -396,6 +409,8 @@ class TTTGame
   end
 
   def display_game_winner
+    clear_screen_and_display_board
+
     if human.score == WINNING_SCORE && computer.score == WINNING_SCORE
       puts "Its a tie"
     elsif human.score == WINNING_SCORE
@@ -415,7 +430,7 @@ class TTTGame
     loop do
       puts "Would you like to play again? (y/n)"
       answer = gets.chomp.downcase
-      break if %w(y n).include? answer
+      break if %w[y n].include? answer
       puts "Sorry, must be y or n"
     end
     answer == 'y'
