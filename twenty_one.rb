@@ -46,6 +46,7 @@ class Player
   attr_accessor :cards, :score 
   def initialize
     @score = 0 
+    @cards = []
   end
  
 end 
@@ -74,7 +75,8 @@ class Game
     deal_cards
     show_initial_cards
     compute_and_display_total_score_cards
-
+    answer = ask_human_hit_or_stay
+    display_human_response(answer)
   end 
 
   private 
@@ -93,8 +95,8 @@ class Game
   end 
 
   def show_initial_cards
-    prompt "Human cards are #{human.cards}" 
-    prompt "Dealer cards are #{dealer.cards}" 
+    prompt "Human cards are #{human.cards[0]} and #{human.cards[1]}" 
+    prompt "Dealer cards are #{dealer.cards[0]} and ?" 
   end
 
   def compute_and_display_total_score_cards
@@ -108,8 +110,32 @@ class Game
   end 
 
   def display_total_score_cards
-    prompt "Human score is #{human.score}"
-    prompt "Dealer score is #{dealer.score}" 
+    prompt "Human score is #{human.score}" 
+  end
+
+  def valid_choice?(answer)
+
+    %w[h s hit stay Hit Stay H S].include?(answer) && answer !~ /\A\s*\z/ && !answer.empty?
+  end
+
+  def display_human_response(answer)
+    if %w[h H Hit hit].include?(answer)
+      prompt "You chose to hit"
+    else
+      prompt "You chose to stay"
+    end
+  end
+
+  def ask_human_hit_or_stay
+    prompt "Would you like to hit or stay? [Valid responses: h s hit stay H S Hit Stay]" 
+    answer = nil
+    loop do 
+      answer = gets.chomp
+      break if valid_choice?(answer)
+      prompt "Please enter a valid response"
+    end
+    
+    answer
   end
 
 end 
