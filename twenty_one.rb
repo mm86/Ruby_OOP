@@ -74,12 +74,17 @@ class Game
     deal_cards
     show_initial_cards
     compute_and_display_total_score_cards
+
   end 
 
   private 
 
+  def prompt(message) 
+    puts "=> #{message}"
+  end
+
   def display_welcome_message
-    puts "Welcome to 21 game"
+    prompt "Welcome to 21 game"
   end 
 
   def deal_cards
@@ -88,8 +93,8 @@ class Game
   end 
 
   def show_initial_cards
-    puts "Human cards are #{human.cards}" 
-    puts "Dealer cards are #{dealer.cards}" 
+    prompt "Human cards are #{human.cards}" 
+    prompt "Dealer cards are #{dealer.cards}" 
   end
 
   def compute_and_display_total_score_cards
@@ -103,8 +108,8 @@ class Game
   end 
 
   def display_total_score_cards
-    puts "Human score is #{human.score}"
-    puts "Dealer score is #{dealer.score}" 
+    prompt "Human score is #{human.score}"
+    prompt "Dealer score is #{dealer.score}" 
   end
 
 end 
