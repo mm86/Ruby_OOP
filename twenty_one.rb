@@ -54,8 +54,7 @@ class Player
   include Message
   attr_accessor :cards, :score, :status, :name
   def initialize
-    @score = 0
-    @cards = []
+    reset_cards_scores
   end
 
   def busted?
@@ -71,6 +70,11 @@ class Player
       prompt "Please enter a valid name"
     end 
     self.name = answer
+  end
+
+  def reset_cards_scores
+    @score = 0
+    @cards = []
   end
 end
 
@@ -94,19 +98,44 @@ class Game
   end
 
   def play
-    display_welcome_message
-    deal_cards
-    show_initial_cards
-    loop do
-      self.current_player = alternate_player(current_player)
-      current_player_turn
-      break if current_player.busted? || both_players_stay?
+    loop do 
+      display_welcome_message
+      deal_cards
+      show_initial_cards
+      loop do
+        self.current_player = alternate_player(current_player)
+        current_player_turn
+        break if current_player.busted? || both_players_stay?
+      end
+      display_winner
+      break unless play_again?
     end
-    display_winner
     display_goodbye_message
   end
 
   private
+
+  def play_again_valid_choice?(answer)
+    %w[yes no y n Y N Yes No].include?(answer) && 
+      answer !~ /\A\s*\z/ &&
+      !answer.empty?
+  end
+
+  def play_again?
+    answer = nil 
+    loop do
+      prompt "Do you want to play again? (y/n)"
+      answer = gets.chomp 
+      if play_again_valid_choice?(answer)
+        human.reset_cards_scores
+        dealer.reset_cards_scores
+        break 
+      else
+        prompt "Please enter a valid response" 
+      end
+    end
+    %w[y yes Y Yes].include?(answer) ? true : false
+  end
 
   def display_welcome_message
     prompt "Welcome to 21 Game"
