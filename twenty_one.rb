@@ -1,5 +1,11 @@
 require 'pry'
 
+module Message
+  def prompt(message)
+    puts "=> #{message}"
+  end
+end
+
 class Deck
   SUITS = ['H', 'D', 'S', 'C']
   VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -45,6 +51,7 @@ class Deck
 end
 
 class Player
+  include Message
   attr_accessor :cards, :score, :status, :name
   def initialize
     @score = 0
@@ -54,9 +61,21 @@ class Player
   def busted?
     score > 21
   end
+
+  def set_name
+    answer = nil
+    loop do
+      prompt "What is your name?"
+      answer = gets.chomp 
+      break if !answer.empty? && answer !~ /\A\s*\z/
+      prompt "Please enter a valid name"
+    end 
+    self.name = answer
+  end
 end
 
 class Game
+  include Message
   DEALER_MAX_SCORE_LIMIT = 17
   attr_reader :human, :dealer, :deck
   attr_accessor :current_player
@@ -70,7 +89,7 @@ class Game
   end
 
   def set_names
-    @human.name = "Madhu"
+    human.set_name
     @dealer.name = "Dealer"
   end
 
@@ -89,10 +108,6 @@ class Game
 
   private
 
-  def prompt(message)
-    puts "=> #{message}"
-  end
-
   def display_welcome_message
     prompt "Welcome to 21 Game"
   end
@@ -103,8 +118,8 @@ class Game
   end
 
   def show_initial_cards
-    prompt "Human cards are #{human.cards[0]} and #{human.cards[1]}. " \
-           "Human score is #{deck.compute_score(human.cards)}"
+    prompt "#{human.name} cards are #{human.cards[0]} and #{human.cards[1]}. " \
+           "#{human.name} score is #{deck.compute_score(human.cards)}"
     prompt "Dealer cards are #{dealer.cards[0]} and ?"
   end
 
@@ -161,7 +176,7 @@ class Game
   end
 
   def human_turn
-    prompt "Human's turn .........."
+    prompt "#{human.name}'s turn .........."
     loop do
       ask_human_hit_or_stay
       if human_chose_hit?
@@ -170,7 +185,7 @@ class Game
         display_cards_update_score
         break if human.busted?
       else
-        prompt "Human chooses to stay"
+        prompt "#{human.name} chooses to stay"
         break
       end
     end
@@ -203,9 +218,9 @@ class Game
 
   def display_winner_details1
     if human.score > dealer.score
-      prompt "Human won. Dealer lost."
+      prompt "#{human.name} won. Dealer lost."
     elsif dealer.score > human.score
-      prompt "Dealer won. Human lost."
+      prompt "Dealer won. #{human.name} lost."
     else
       prompt "Its a tie."
     end
@@ -213,9 +228,9 @@ class Game
 
   def display_winner_details2
     if human.busted?
-      prompt "Human busted. Dealer won"
+      prompt "#{human.name} busted. Dealer won"
     else
-      prompt "Dealer busted. Human won"
+      prompt "Dealer busted. #{human.name} won"
     end
   end
 
