@@ -63,7 +63,6 @@ end
 
 module Prompt
   def display_prompt_continue(game_status)
-    answer = nil
     loop do
       if game_status == :new
         prompt "Press enter to start playing the game"
