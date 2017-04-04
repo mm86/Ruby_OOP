@@ -1,4 +1,4 @@
-# .rubocop.yml for non-101 courses (11 Feb 2017)
+# .rubocop.yml for non-101 courses (13 Mar 2017)
 
 AllCops:
   # Display cop names
@@ -139,6 +139,21 @@ Style/ParenthesesAroundCondition:
   Enabled: true
   AllowSafeAssignment: false
 
+Style/PercentLiteralDelimiters:
+  Description: 'Use `%`-literal delimiters consistently'
+  Enabled: true
+  PreferredDelimiters:
+    '%':  ()
+    '%i': '[]'
+    '%I': '[]'
+    '%q': ()
+    '%Q': ()
+    '%r': '{}'
+    '%s': ()
+    '%w': '[]'
+    '%W': '[]'
+    '%x': ()
+
 Style/PerlBackrefs:
   Description: Avoid Perl-style regex back references.
   Enabled: false
@@ -230,3 +245,16 @@ Lint/LiteralInInterpolation:
   Description: 'Avoid interpolating literals in strings'
   AutoCorrect: false
   Enabled: true
+
+##################### Performance ##################################
+
+Performance/Casecmp:
+  Description: 'Use `casecmp` rather than `downcase ==`.'
+  Reference: 'https://github.com/JuanitoFatas/fast-ruby#stringcasecmp-vs-stringdowncase---code'
+  Enabled: false
+
+Performance/RedundantMatch:
+  Description: >-
+                  Use `=~` instead of `String#match` or `Regexp#match` in a context where the
+                  returned `MatchData` is not needed.
+  Enabled: false
