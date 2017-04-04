@@ -10,6 +10,7 @@ class TwentyOne
                 :game_winner, :deck, :human, :dealer
 
   def initialize
+    clear
     @deck = Deck.new
     @human = Human.new(@deck)
     @dealer = Dealer.new(@deck)
