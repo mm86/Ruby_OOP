@@ -1,5 +1,5 @@
 class Player
-  include Display, SetName
+  include Display, SetName, PlayAgain
   attr_accessor :cards, :total, :status, :name, :score, :deck
 
   def initialize(deck)
@@ -25,14 +25,6 @@ class Player
   def cards_calc_total
     self.total = deck.compute_total(cards)
   end
-
-  private
-
-  def valid_hit_stay_response?(answer)
-    %w[h s hit stay Hit Stay H S].include?(answer) &&
-      answer !~ /\A\s*\z/ &&
-      !answer.empty?
-  end
 end
 
 class Human < Player
@@ -57,11 +49,11 @@ class Human < Player
   end
 
   def chose_hit?
-    %w[h hit Hit H].include?(status)
+    %w[h hit Hit H HIT].include?(status)
   end
 
   def chose_stay?
-    %w[s stay Stay S].include?(status)
+    %w[s stay Stay S STAY].include?(status)
   end
 
   private
@@ -71,7 +63,7 @@ class Human < Player
     loop do
       prompt "Would you like to hit or stay?"
       answer = gets.chomp
-      break if valid_hit_stay_response?(answer)
+      break if valid_response?(answer.downcase, :hit_or_stay)
       prompt "Please enter a valid choice"
     end
     self.status = answer

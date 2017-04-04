@@ -98,8 +98,14 @@ module SetName
 end
 
 module PlayAgain
-  def valid_response?(answer)
-    %w[yes no y n Y N Yes No].include?(answer) &&
+  def valid_response?(answer, task = :yes_or_no)
+    valid_responses = if task == :hit_or_stay
+                        %w[h s hit stay]
+                      else
+                        %w[yes no y n]
+                      end
+
+    valid_responses.include?(answer) &&
       answer !~ /\A\s*\z/ &&
       !answer.empty?
   end
@@ -109,9 +115,9 @@ module PlayAgain
     loop do
       prompt "Do you want to play again? (y/n)"
       answer = gets.chomp
-      break if valid_response?(answer)
+      break if valid_response?(answer.downcase)
       prompt "Please enter a valid response"
     end
-    %w[y yes Y Yes].include?(answer)
+    %w[y yes].include?(answer.downcase)
   end
 end
