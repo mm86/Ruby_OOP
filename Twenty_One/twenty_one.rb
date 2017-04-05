@@ -1,5 +1,8 @@
 class TwentyOne
-  include Display, System, Prompt, PlayAgain
+  include Display
+  include System
+  include Prompt
+  include PlayAgain
 
   WINNING_SCORE = 5
   DEALER_CARDS_TOTAL_MAX = 17

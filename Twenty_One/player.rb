@@ -1,5 +1,7 @@
 class Player
-  include Display, SetName, PlayAgain
+  include Display
+  include SetName
+  include PlayAgain
   attr_accessor :cards, :total, :status, :name, :score, :deck
 
   def initialize(deck)
@@ -88,12 +90,18 @@ class Dealer < Player
 
   private
 
-  def dealer_busts_or_stays?
-    return true if busted?
+  def dealer_stays?
+    dealer_stays_value = false
     if total >= TwentyOne::DEALER_CARDS_TOTAL_MAX
       prompt "#{name} chooses to stay"
       self.status = 'stay'
-      true
+      dealer_stays_value = true
     end
+    dealer_stays_value
+  end
+
+  def dealer_busts_or_stays?
+    return true if busted?
+    return true if dealer_stays?
   end
 end
